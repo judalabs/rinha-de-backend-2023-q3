@@ -5,10 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.judalabs.rinhabackend.exception.UnprocessableEntityException;
 import com.judalabs.rinhabackend.infra.PessoaRepository;
 
 @Service
@@ -20,25 +19,25 @@ public class PessoaService {
         this.pessoaRepository = pessoaRepository;
     }
 
+    @Transactional
     public PessoaDTO criar(PessoaDTO pessoa) {
-        try {
-            return toDto(pessoaRepository.save(toEntity(pessoa)));
-        } catch (DataIntegrityViolationException e) {
-            throw new UnprocessableEntityException();
-        }
+        return toDto(pessoaRepository.save(toEntity(pessoa)));
     }
 
+    @Transactional(readOnly = true)
     public Optional<PessoaDTO> buscarPorId(UUID id) {
         return pessoaRepository.findById(id).map(this::toDto);
     }
 
 
+    @Transactional(readOnly = true)
     public List<PessoaDTO> buscarPorTermo(String termo) {
         return pessoaRepository.buscarPorTermo(termo)
                 .stream().map(this::toDto)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public long contar() {
         return pessoaRepository.count();
     }

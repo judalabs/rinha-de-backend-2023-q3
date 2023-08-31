@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-@Constraint(validatedBy = StackValidator.class)
+@Constraint(validatedBy = PessoaValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface Stack {
+@Target(ElementType.TYPE)
+public @interface Pessoa {
 
     String message() default "stack incorreta";
 

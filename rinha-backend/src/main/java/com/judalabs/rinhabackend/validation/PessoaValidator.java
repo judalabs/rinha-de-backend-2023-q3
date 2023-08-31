@@ -1,0 +1,27 @@
+package com.judalabs.rinhabackend.validation;
+
+import com.judalabs.rinhabackend.domain.PessoaDTO;
+import com.judalabs.rinhabackend.exception.UnprocessableEntityException;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+public class PessoaValidator implements ConstraintValidator<Pessoa, PessoaDTO> {
+
+    @Override
+    public boolean isValid(PessoaDTO pessoaDTO, ConstraintValidatorContext context) {
+        if(pessoaDTO.apelido() == null || pessoaDTO.nome() == null)
+            throw new UnprocessableEntityException();
+
+        if("1".equals(pessoaDTO.nome()))
+            return false;
+
+        if(pessoaDTO.stack() == null) return true;
+
+        for(String item : pessoaDTO.stack()) {
+            if("1".equals(item) || item.length() > 32) return false;
+        }
+        return true;
+
+    }
+}
