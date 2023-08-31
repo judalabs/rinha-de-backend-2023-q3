@@ -13,9 +13,7 @@ public interface PessoaRepository extends JpaRepository<Pessoa, UUID> {
 
     @Query(nativeQuery = true,
             value = "SELECT p.* FROM pessoa p " +
-                    "WHERE p.apelido ILIKE CONCAT('%', :termo, '%') OR " +
-                    "p.nome ILIKE CONCAT('%', :termo, '%') OR " +
-                    "p.stack ILIKE CONCAT('%', :termo, '%') " +
+                    "WHERE p.busca_completa LIKE :termo " +
                     "LIMIT 50")
     List<Pessoa> buscarPorTermo(@Param("termo") String termo);
 

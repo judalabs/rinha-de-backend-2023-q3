@@ -1,5 +1,6 @@
 package com.judalabs.rinhabackend.domain;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -12,5 +13,5 @@ public record PessoaDTO(
         String nome,
         String apelido,
         LocalDate nascimento,
-        List<String> stack) {
+        List<String> stack) implements Serializable {
 }
