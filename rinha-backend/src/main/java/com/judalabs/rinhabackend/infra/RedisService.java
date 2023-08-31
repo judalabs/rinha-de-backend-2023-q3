@@ -33,7 +33,7 @@ public class RedisService implements Cacheable {
     }
 
     @TransactionalEventListener
-    public void receiveCache(PessoaDTO pessoaDTO) {
+    public void atualizacaoDeCacheListener(PessoaDTO pessoaDTO) {
         redisFindOne.opsForValue().set(pessoaDTO.id(), pessoaDTO);
         redisExistsApelido.opsForValue().set(pessoaDTO.apelido(), true);
     }

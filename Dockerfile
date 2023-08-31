@@ -1,7 +1,7 @@
 FROM amazoncorretto:17.0.7-alpine
 
 WORKDIR /app
-COPY target/rinha-backend-0.0.1-SNAPSHOT-plain.jar /app/service.jar
+COPY rinha-backend/build/libs/rinha-backend-0.0.1-SNAPSHOT.jar /app/service.jar
 
 EXPOSE 8080
 
