@@ -12,11 +12,10 @@ import com.judalabs.rinhabackend.domain.Pessoa;
 public interface PessoaRepository extends JpaRepository<Pessoa, UUID> {
 
     @Query(nativeQuery = true,
-            value = "SELECT DISTINCT p.* FROM pessoas p " +
-                    "LEFT JOIN pessoas_stacks ps ON p.id = ps.pessoa_id " +
-                    "WHERE p.apelido ILIKE CONCAT('%', :searchTerm, '%') OR " +
+            value = "SELECT p.* FROM pessoa p " +
+                    "WHERE p.apelido ILIKE CONCAT('%', :termo, '%') OR " +
                     "p.nome ILIKE CONCAT('%', :termo, '%') OR " +
-                    "ps.stack ILIKE CONCAT('%', :termo, '%') " +
+                    "p.stack ILIKE CONCAT('%', :termo, '%') " +
                     "LIMIT 50")
     List<Pessoa> buscarPorTermo(@Param("termo") String termo);
 

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,7 +22,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @Validated
-@RequestMapping("/pessoas")
 public class PessoaController {
 
     private final PessoaService pessoaService;
@@ -32,7 +30,7 @@ public class PessoaController {
         this.pessoaService = pessoaService;
     }
 
-    @PostMapping
+    @PostMapping("/pessoas")
     public ResponseEntity<PessoaDTO> criar(@RequestBody @Valid PessoaDTO pessoa) {
         PessoaDTO salvo = pessoaService.criar(pessoa);
 
@@ -40,14 +38,14 @@ public class PessoaController {
         return ResponseEntity.created(uri).body(salvo);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/pessoas/{id}")
     public ResponseEntity<PessoaDTO> buscarPorId(@PathVariable UUID id) {
         return pessoaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(NotFoundException::new);
     }
 
-    @GetMapping
+    @GetMapping("/pessoas")
     public ResponseEntity<List<PessoaDTO>> buscarPorTermo(@RequestParam(value = "t") String termo) {
         return ResponseEntity.ok(pessoaService.buscarPorTermo(termo));
     }
