@@ -12,8 +12,8 @@ services:
       - DATABASE_PASSWORD=postgres
       - REDIS_HOST=cache
 
-      - HIKARI_MAXIMUM_POOL_SIZE=50
-      - HIKARI_MINIMUM_IDLE=20
+      - HIKARI_MAXIMUM_POOL_SIZE=80
+      - HIKARI_MINIMUM_IDLE=50
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -22,8 +22,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: '750M'
+          cpus: '0.45'
+          memory: '900M'
     networks:
       app-network:
 
@@ -37,8 +37,8 @@ services:
       - DATABASE_PASSWORD=postgres
       - REDIS_HOST=cache
 
-      - HIKARI_MAXIMUM_POOL_SIZE=50
-      - HIKARI_MINIMUM_IDLE=20
+      - HIKARI_MAXIMUM_POOL_SIZE=80
+      - HIKARI_MINIMUM_IDLE=50
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -47,8 +47,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: '750M'
+          cpus: '0.45'
+          memory: '900M'
     networks:
       app-network:
 
@@ -59,20 +59,20 @@ services:
     depends_on:
       - api-1
     ports:
-      - "9999:9999"
+      - '9999:9999'
     deploy:
       resources:
         limits:
-          cpus: '0.1'
-          memory: '100M'
+          cpus: '0.05'
+          memory: '350M'
     networks:
       - app-network
-
   postgres-db:
     image: postgres:latest
-#    command: postgres -c 'max_connections=600'
     container_name: rinha-backend-db
     user: postgres
+    command:
+      -p 6553 && postgres -c config_file=/docker-entrypoint-initdb.d/postgresql.conf
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
@@ -82,16 +82,16 @@ services:
       interval: 3s
       timeout: 5s
       retries: 10
-    command: -p 6553
     ports:
       - '6553:5432'
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: '1200M'
+          memory: '800M'
     volumes:
       - ./rinha-backend/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
     networks:
       - app-network
 
@@ -103,13 +103,13 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: '200M'
+          cpus: '0.05'
+          memory: '50M'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: [ 'CMD', 'redis-cli', '--raw', 'incr', 'ping' ]
     networks:
       - app-network
 

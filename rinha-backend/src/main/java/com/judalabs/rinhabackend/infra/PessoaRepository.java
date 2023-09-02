@@ -12,9 +12,9 @@ import com.judalabs.rinhabackend.domain.Pessoa;
 public interface PessoaRepository extends JpaRepository<Pessoa, UUID> {
 
     @Query(nativeQuery = true,
-            value = "SELECT p.* FROM pessoa p " +
-                    "WHERE p.busca_completa LIKE :termo " +
-                    "LIMIT 50")
+            value = " SELECT p.* FROM pessoa p " +
+                    " WHERE p.busca_completa LIKE CONCAT('%', :termo, '%')" +
+                    " LIMIT 50")
     List<Pessoa> buscarPorTermo(@Param("termo") String termo);
 
 }

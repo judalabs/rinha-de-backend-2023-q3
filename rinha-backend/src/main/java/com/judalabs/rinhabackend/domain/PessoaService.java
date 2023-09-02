@@ -64,7 +64,7 @@ public class PessoaService {
 
     private Pessoa toEntity(PessoaDTO pessoa) {
         var stack = pessoa.stack() != null ? String.join(",", pessoa.stack()) : null;
-        return new Pessoa(pessoa.apelido(), pessoa.nome(), pessoa.nascimento(), stack);
+        return new Pessoa(pessoa.nome(), pessoa.apelido(), pessoa.nascimento(), stack);
     }
 
     private PessoaDTO toDto(Pessoa entity) {

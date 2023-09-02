@@ -12,6 +12,8 @@ public class PessoaValidator implements ConstraintValidator<Pessoa, PessoaDTO> {
     public boolean isValid(PessoaDTO pessoaDTO, ConstraintValidatorContext context) {
         if(pessoaDTO.apelido() == null || pessoaDTO.nome() == null)
             throw new UnprocessableEntityException();
+        if(pessoaDTO.apelido().length() > 32 || pessoaDTO.nome().length() > 100)
+            throw new UnprocessableEntityException();
 
         if("1".equals(pessoaDTO.nome()))
             return false;
