@@ -3,35 +3,31 @@ package com.judalabs.rinhabackend.domain;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-@Entity
 @Table(name = "pessoa")
-public class Pessoa {
+public class Pessoa implements Persistable<UUID> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
+    @Column(value = "id")
     private UUID id;
 
-    @Column(name = "nome", length = 100, nullable = false)
+    @Column(value = "nome")
     private String nome;
 
-    @Column(name = "apelido", length = 32, nullable = false)
+    @Column(value = "apelido")
     private String apelido;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "nascimento", nullable = false)
+    @Column(value = "nascimento")
     private LocalDate nascimento;
 
-    @Column(name = "stack")
+    @Column(value = "stack")
     private String stack;
 
     public Pessoa() {
@@ -46,6 +42,11 @@ public class Pessoa {
 
     public UUID getId() {
         return id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return id == null;
     }
 
     public void setId(UUID id) {

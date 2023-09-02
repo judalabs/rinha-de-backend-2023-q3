@@ -1,20 +1,22 @@
 package com.judalabs.rinhabackend.infra;
 
-import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Repository;
 
 import com.judalabs.rinhabackend.domain.Pessoa;
 
-public interface PessoaRepository extends JpaRepository<Pessoa, UUID> {
+import reactor.core.publisher.Flux;
 
-    @Query(nativeQuery = true,
-            value = " SELECT p.* FROM pessoa p " +
+@Repository
+public interface PessoaRepository extends ReactiveCrudRepository<Pessoa, UUID> {
+
+    @Query(value = " SELECT p.* FROM pessoa p " +
                     " WHERE p.busca_completa LIKE CONCAT('%', :termo, '%')" +
                     " LIMIT 50")
-    List<Pessoa> buscarPorTermo(@Param("termo") String termo);
+    Flux<Pessoa> buscarPorTermo(@Param("termo") String termo);
 
 }

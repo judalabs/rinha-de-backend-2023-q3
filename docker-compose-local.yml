@@ -13,7 +13,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
     ports:
-      - "6553:5432"
+      - "6553:6553"
     deploy:
       resources:
         limits:

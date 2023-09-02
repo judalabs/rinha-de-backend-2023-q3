@@ -1,27 +1,25 @@
 package com.judalabs.rinhabackend.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.judalabs.rinhabackend.domain.PessoaDTO;
 import com.judalabs.rinhabackend.domain.PessoaService;
-import com.judalabs.rinhabackend.exception.NotFoundException;
 
 import jakarta.validation.Valid;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
-@Validated
 public class PessoaController {
 
     private final PessoaService pessoaService;
@@ -31,33 +29,33 @@ public class PessoaController {
     }
 
     @PostMapping("/pessoas")
-    public ResponseEntity<PessoaDTO> criar(@RequestBody @Valid PessoaDTO pessoa) {
-        PessoaDTO salvo = pessoaService.criar(pessoa);
-
-        final URI uri = getUri(salvo);
-        return ResponseEntity.created(uri).body(salvo);
+    public Mono<ResponseEntity<PessoaDTO>> criar(@Valid @RequestBody PessoaDTO pessoaDTO) {
+        return pessoaService.criar(pessoaDTO).map(p -> {
+            final URI uri = getUri(p);
+            return ResponseEntity.created(uri).body(p);
+        });
     }
 
     @GetMapping("/pessoas/{id}")
-    public ResponseEntity<PessoaDTO> buscarPorId(@PathVariable UUID id) {
-        return pessoaService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(NotFoundException::new);
+    public Mono<ResponseEntity<PessoaDTO>> buscarPorId(@PathVariable UUID id) {
+        return pessoaService.buscarPorId(id).map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/pessoas")
-    public ResponseEntity<List<PessoaDTO>> buscarPorTermo(@RequestParam(value = "t") String termo) {
-        return ResponseEntity.ok(pessoaService.buscarPorTermo(termo));
+    public Flux<ResponseEntity<PessoaDTO>> buscarPorTermo(@RequestParam("t") String termo) {
+        return pessoaService.buscarPorTermo(termo)
+                .map(ResponseEntity::ok);
     }
 
-    @GetMapping("/contagem-pessoas")
-    public ResponseEntity<Long> countPeople() {
-        return ResponseEntity.ok(pessoaService.contar());
+    @GetMapping(value = "/contagem-pessoas", produces = "application/json")
+    public Mono<ResponseEntity<Long>> contarPessoas() {
+        return pessoaService.contar().map(ResponseEntity::ok);
     }
 
     private URI getUri(PessoaDTO salvo) {
-        return ServletUriComponentsBuilder
-                .fromCurrentRequest()
+        return UriComponentsBuilder
+                .fromUriString("/pessoas")
                 .path("/{id}")
                 .buildAndExpand(salvo.id())
                 .toUri();

@@ -2,7 +2,6 @@ package com.judalabs.rinhabackend.domain;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -12,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.judalabs.rinhabackend.exception.UnprocessableEntityException;
 import com.judalabs.rinhabackend.infra.Cacheable;
 import com.judalabs.rinhabackend.infra.PessoaRepository;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class PessoaService {
@@ -29,36 +31,32 @@ public class PessoaService {
     }
 
     @Transactional
-    public PessoaDTO criar(PessoaDTO pessoa) {
+    public Mono<PessoaDTO> criar(PessoaDTO pessoa) {
         if(cacheService.existePorApelido(pessoa.apelido())) {
             throw new UnprocessableEntityException();
         }
-        final PessoaDTO dto = toDto(pessoaRepository.save(toEntity(pessoa)));
-        applicationEventPublisher.publishEvent(dto);
+        final Mono<PessoaDTO> dto = pessoaRepository.save(toEntity(pessoa)).map(this::toDto);
+//        applicationEventPublisher.publishEvent(dto);
         return dto;
     }
 
-    @Transactional(readOnly = true)
-    public Optional<PessoaDTO> buscarPorId(UUID id) {
+    public Mono<PessoaDTO> buscarPorId(UUID id) {
         final PessoaDTO pessoaCache = cacheService.existePorId(id);
 
         if(pessoaCache != null) {
-            return Optional.of(pessoaCache);
+            return Mono.just(pessoaCache);
         }
 
         return pessoaRepository.findById(id).map(this::toDto);
     }
 
 
-    @Transactional(readOnly = true)
-    public List<PessoaDTO> buscarPorTermo(String termo) {
+    public Flux<PessoaDTO> buscarPorTermo(String termo) {
         return pessoaRepository.buscarPorTermo(termo.toLowerCase())
-                .stream().map(this::toDto)
-                .toList();
+                .map(this::toDto);
     }
 
-    @Transactional(readOnly = true)
-    public long contar() {
+    public Mono<Long> contar() {
         return pessoaRepository.count();
     }
 

@@ -3,6 +3,7 @@ package com.judalabs.rinhabackend.validation;
 import com.judalabs.rinhabackend.domain.PessoaDTO;
 import com.judalabs.rinhabackend.exception.UnprocessableEntityException;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -10,7 +11,7 @@ public class PessoaValidator implements ConstraintValidator<Pessoa, PessoaDTO> {
 
     @Override
     public boolean isValid(PessoaDTO pessoaDTO, ConstraintValidatorContext context) {
-        if(pessoaDTO.apelido() == null || pessoaDTO.nome() == null)
+        if(StringUtils.isEmpty(pessoaDTO.apelido()) || pessoaDTO.nome() == null)
             throw new UnprocessableEntityException();
         if(pessoaDTO.apelido().length() > 32 || pessoaDTO.nome().length() > 100)
             throw new UnprocessableEntityException();
