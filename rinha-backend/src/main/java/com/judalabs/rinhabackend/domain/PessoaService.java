@@ -40,7 +40,7 @@ public class PessoaService {
 
     @Transactional(readOnly = true)
     public Optional<PessoaDTO> buscarPorId(UUID id) {
-        final PessoaDTO pessoaCache = cacheService.existePorApelido(id);
+        final PessoaDTO pessoaCache = cacheService.existePorId(id);
 
         if(pessoaCache != null) {
             return Optional.of(pessoaCache);

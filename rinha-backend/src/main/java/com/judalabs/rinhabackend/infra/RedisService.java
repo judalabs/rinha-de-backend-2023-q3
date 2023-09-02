@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.judalabs.rinhabackend.domain.PessoaDTO;
@@ -28,11 +29,11 @@ public class RedisService implements Cacheable {
     }
 
     @Override
-    public PessoaDTO existePorApelido(UUID id) {
+    public PessoaDTO existePorId(UUID id) {
         return redisFindOne.opsForValue().get(id);
     }
 
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void atualizacaoDeCacheListener(PessoaDTO pessoaDTO) {
         redisFindOne.opsForValue().set(pessoaDTO.id(), pessoaDTO);
         redisExistsApelido.opsForValue().set(pessoaDTO.apelido(), true);

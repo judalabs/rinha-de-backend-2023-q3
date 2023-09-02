@@ -7,6 +7,6 @@ import com.judalabs.rinhabackend.domain.PessoaDTO;
 public interface Cacheable {
     boolean existePorApelido(String apelido);
 
-    PessoaDTO existePorApelido(UUID id);
+    PessoaDTO existePorId(UUID id);
 
 }
