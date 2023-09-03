@@ -57,7 +57,7 @@ public class PessoaController {
         return UriComponentsBuilder
                 .fromUriString("/pessoas")
                 .path("/{id}")
-                .buildAndExpand(salvo.id())
+                .buildAndExpand(salvo.getId())
                 .toUri();
     }
 }

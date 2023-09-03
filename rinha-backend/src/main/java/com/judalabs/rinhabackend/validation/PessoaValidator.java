@@ -11,17 +11,17 @@ public class PessoaValidator implements ConstraintValidator<Pessoa, PessoaDTO> {
 
     @Override
     public boolean isValid(PessoaDTO pessoaDTO, ConstraintValidatorContext context) {
-        if(StringUtils.isEmpty(pessoaDTO.apelido()) || pessoaDTO.nome() == null)
+        if(StringUtils.isEmpty(pessoaDTO.getApelido()) || pessoaDTO.getNome() == null)
             throw new UnprocessableEntityException();
-        if(pessoaDTO.apelido().length() > 32 || pessoaDTO.nome().length() > 100)
+        if(pessoaDTO.getApelido().length() > 32 || pessoaDTO.getNome().length() > 100)
             throw new UnprocessableEntityException();
 
-        if("1".equals(pessoaDTO.nome()))
+        if("1".equals(pessoaDTO.getNome()))
             return false;
 
-        if(pessoaDTO.stack() == null) return true;
+        if(pessoaDTO.getStack() == null) return true;
 
-        for(String item : pessoaDTO.stack()) {
+        for(String item : pessoaDTO.getStack()) {
             if("1".equals(item) || item.length() > 32) return false;
         }
         return true;

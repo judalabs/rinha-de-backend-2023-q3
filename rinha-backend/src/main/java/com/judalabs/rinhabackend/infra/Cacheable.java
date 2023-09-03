@@ -4,9 +4,12 @@ import java.util.UUID;
 
 import com.judalabs.rinhabackend.domain.PessoaDTO;
 
-public interface Cacheable {
-    boolean existePorApelido(String apelido);
+import reactor.core.publisher.Mono;
 
-    PessoaDTO existePorId(UUID id);
+public interface Cacheable {
+
+    Mono<Boolean> existePorApelido(String apelido);
+
+    Mono<PessoaDTO> existePorId(UUID id);
 
 }

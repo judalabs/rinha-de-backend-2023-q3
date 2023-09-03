@@ -1,7 +1,5 @@
 package com.judalabs.rinhabackend.domain;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,28 +30,31 @@ public class PessoaService {
 
     @Transactional
     public Mono<PessoaDTO> criar(PessoaDTO pessoa) {
-        if(cacheService.existePorApelido(pessoa.apelido())) {
-            throw new UnprocessableEntityException();
-        }
-        final Mono<PessoaDTO> dto = pessoaRepository.save(toEntity(pessoa)).map(this::toDto);
-//        applicationEventPublisher.publishEvent(dto);
-        return dto;
+        return cacheService.existePorApelido(pessoa.getApelido())
+                .flatMap(e -> Mono.<PessoaDTO>error(new UnprocessableEntityException()))
+                .switchIfEmpty(buscarSalvandoNoBanco(pessoa));
+    }
+
+    @Transactional
+    public Mono<PessoaDTO> buscarSalvandoNoBanco(PessoaDTO pessoa) {
+        final Pessoa entity = toEntity(pessoa);
+        return pessoaRepository.save(entity).map(e -> {
+            final PessoaDTO dto = PessoaDTO.toDto(e);
+            applicationEventPublisher.publishEvent(dto);
+            return dto;
+        });
+
     }
 
     public Mono<PessoaDTO> buscarPorId(UUID id) {
-        final PessoaDTO pessoaCache = cacheService.existePorId(id);
-
-        if(pessoaCache != null) {
-            return Mono.just(pessoaCache);
-        }
-
-        return pessoaRepository.findById(id).map(this::toDto);
+        return cacheService.existePorId(id)
+                .switchIfEmpty(pessoaRepository.findById(id).map(PessoaDTO::toDto));
     }
 
 
     public Flux<PessoaDTO> buscarPorTermo(String termo) {
         return pessoaRepository.buscarPorTermo(termo.toLowerCase())
-                .map(this::toDto);
+                .map(PessoaDTO::toDto);
     }
 
     public Mono<Long> contar() {
@@ -61,12 +62,9 @@ public class PessoaService {
     }
 
     private Pessoa toEntity(PessoaDTO pessoa) {
-        var stack = pessoa.stack() != null ? String.join(",", pessoa.stack()) : null;
-        return new Pessoa(pessoa.nome(), pessoa.apelido(), pessoa.nascimento(), stack);
+        var stack = pessoa.getStack() != null ? String.join(",", pessoa.getStack()) : null;
+        return new Pessoa(pessoa.getNome(), pessoa.getApelido(), pessoa.getNascimento(), stack);
     }
 
-    private PessoaDTO toDto(Pessoa entity) {
-        List<String> stacks = entity.getStack() != null ? Arrays.stream(entity.getStack().split(",")).toList() : null;
-        return new PessoaDTO(entity.getId(), entity.getApelido(), entity.getNome(), entity.getNascimento(), stacks);
-    }
+
 }
