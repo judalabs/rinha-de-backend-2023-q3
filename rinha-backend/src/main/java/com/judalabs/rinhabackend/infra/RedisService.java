@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.judalabs.rinhabackend.domain.PessoaDTO;
+import com.judalabs.rinhabackend.domain.PessoaSalvaListener;
 
 import reactor.core.publisher.Mono;
 
@@ -35,8 +36,8 @@ public class RedisService implements Cacheable {
     }
 
     @EventListener
-    public void atualizacaoDeCacheListener(PessoaDTO pessoaDTO) {
-        redisFindOne.opsForValue().set(pessoaDTO.getId(), pessoaDTO);
-        redisExistsApelido.opsForValue().set(pessoaDTO.getApelido(), true);
+    public void atualizacaoDeCacheListener(PessoaSalvaListener listener) {
+        redisFindOne.opsForValue().set(listener.pessoaDTO().getId(), listener.pessoaDTO());
+        redisExistsApelido.opsForValue().set(listener.pessoaDTO().getApelido(), true);
     }
 }

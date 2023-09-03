@@ -35,12 +35,11 @@ public class PessoaService {
                 .switchIfEmpty(buscarSalvandoNoBanco(pessoa));
     }
 
-    @Transactional
-    public Mono<PessoaDTO> buscarSalvandoNoBanco(PessoaDTO pessoa) {
+    private Mono<PessoaDTO> buscarSalvandoNoBanco(PessoaDTO pessoa) {
         final Pessoa entity = toEntity(pessoa);
         return pessoaRepository.save(entity).map(e -> {
             final PessoaDTO dto = PessoaDTO.toDto(e);
-            applicationEventPublisher.publishEvent(dto);
+            applicationEventPublisher.publishEvent(new PessoaSalvaListener(dto));
             return dto;
         });
 
