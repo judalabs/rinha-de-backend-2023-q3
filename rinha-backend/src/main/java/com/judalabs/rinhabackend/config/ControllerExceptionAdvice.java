@@ -2,6 +2,7 @@ package com.judalabs.rinhabackend.config;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,6 +26,11 @@ public class ControllerExceptionAdvice {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<String> handleNotFound(Exception exception) {
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(CannotCreateTransactionException.class)
+    public ResponseEntity<String> handleUnknown(Exception exception) {
+        return ResponseEntity.status(599).body(exception.toString());
     }
 
 }

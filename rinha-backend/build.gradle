@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.judalabs'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0-WEBFLUX'
 
 java {
     sourceCompatibility = '17'
@@ -24,12 +24,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-
-//    implementation 'org.springframework.data:spring-data-redis'
-//    implementation 'io.lettuce:lettuce-core:6.2.6.RELEASE'
-
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
-
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
