@@ -72,6 +72,8 @@ services:
     image: postgres:latest
     container_name: postgres-db
     user: postgres
+    command:
+      ["postgres", "-c", "config_file=/docker-entrypoint-initdb.d/postgresql.conf"]
     environment:
       - PGDATA=/var/lib/postgresql/data/
       - POSTGRES_PASSWORD=postgres
@@ -84,8 +86,6 @@ services:
       retries: 10
     ports:
       - '6553:5432'
-#    command:
-#      ["postgres", "-c", "config_file=/docker-entrypoint-initdb.d/postgresql.conf"]
     deploy:
       resources:
         limits:
