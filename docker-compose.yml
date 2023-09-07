@@ -7,12 +7,11 @@ services:
     hostname: api-1
     environment:
       - SERVER_PORT=8080
-      - DATABASE_URL=jdbc:postgresql://postgres-db:6553/postgres
+      - DATABASE_URL=jdbc:postgresql://postgres-db:5432/postgres
       - DATABASE_USERNAME=postgres
       - DATABASE_PASSWORD=postgres
       - REDIS_HOST=cache
 
-      - HIKARI_MAXIMUM_POOL_SIZE=80
       - HIKARI_MINIMUM_IDLE=50
     depends_on:
       postgres-db:
@@ -32,12 +31,11 @@ services:
     hostname: api-2
     environment:
       - SERVER_PORT=8080
-      - DATABASE_URL=jdbc:postgresql://postgres-db:6553/postgres
+      - DATABASE_URL=jdbc:postgresql://postgres-db:5432/postgres
       - DATABASE_USERNAME=postgres
       - DATABASE_PASSWORD=postgres
       - REDIS_HOST=cache
 
-      - HIKARI_MAXIMUM_POOL_SIZE=80
       - HIKARI_MINIMUM_IDLE=50
     depends_on:
       postgres-db:
@@ -58,6 +56,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api-1
+      - api-2
     ports:
       - '9999:9999'
     deploy:
@@ -69,16 +68,17 @@ services:
       - app-network
   postgres-db:
     image: postgres:latest
-    container_name: rinha-backend-db
-    user: postgres
+    container_name: postgres-db
+    hostname: postgres-db
     command:
-      -p 6553 && postgres -c config_file=/docker-entrypoint-initdb.d/postgresql.conf
+      'postgres -c max_connections=600 -c shared_buffers=512MB -c synchronous_commit=off -c fsync=off'
+#     maintenance_work_mem=256MB  -c full_page_writes=off -c autovacuum=on -c log_statement=none -c log_duration=off
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -p 6553" ]
+      test: [ "CMD-SHELL", "pg_isready -p 5432 -U postgres" ]
       interval: 3s
       timeout: 5s
       retries: 10
