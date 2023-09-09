@@ -1,20 +1,18 @@
 version: '3.8'
-name: 'rinha-backend'
+name: 'rinha'
 
 services:
-  api-1:
+  api-1: &api
     image: rodriginhu/rinha-backend
     hostname: api-1
     environment:
       - SERVER_PORT=8080
-      - DATABASE_URL=jdbc:postgresql://postgres-db:5432/postgres
+      - DATABASE_URL=jdbc:postgresql://pgbouncer:6432/postgres
       - DATABASE_USERNAME=postgres
       - DATABASE_PASSWORD=postgres
       - REDIS_HOST=cache
-
-      - HIKARI_MINIMUM_IDLE=50
     depends_on:
-      postgres-db:
+      pgbouncer:
         condition: service_healthy
       cache:
         condition: service_healthy
@@ -22,31 +20,34 @@ services:
       resources:
         limits:
           cpus: '0.45'
-          memory: '900M'
+          memory: '600M'
     networks:
       app-network:
 
   api-2:
-    image: rodriginhu/rinha-backend
+    <<: *api
     hostname: api-2
-    environment:
-      - SERVER_PORT=8080
-      - DATABASE_URL=jdbc:postgresql://postgres-db:5432/postgres
-      - DATABASE_USERNAME=postgres
-      - DATABASE_PASSWORD=postgres
-      - REDIS_HOST=cache
 
-      - HIKARI_MINIMUM_IDLE=50
-    depends_on:
-      postgres-db:
-        condition: service_healthy
-      cache:
-        condition: service_healthy
+  pgbouncer:
+    image: edoburu/pgbouncer
+    container_name: pgbouncer
+    ports:
+      - "6432:6432"
+    environment:
+      - PGBOUNCER_INI_FILE=/etc/pgbouncer/pgbouncer.ini
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "postgres", "-p", "5432", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini
+      - ./userlist.txt:/etc/pgbouncer/userlist.txt
     deploy:
       resources:
         limits:
-          cpus: '0.45'
-          memory: '900M'
+          cpus: '0.05'
+          memory: '100M'
     networks:
       app-network:
 
@@ -63,16 +64,16 @@ services:
       resources:
         limits:
           cpus: '0.05'
-          memory: '350M'
+          memory: '550M'
     networks:
       - app-network
-  postgres-db:
+
+  postgres:
     image: postgres:latest
-    container_name: postgres-db
-    hostname: postgres-db
+    container_name: postgres
+    hostname: postgres
     command:
-      'postgres -c max_connections=600 -c shared_buffers=512MB -c synchronous_commit=off -c fsync=off'
-#     maintenance_work_mem=256MB  -c full_page_writes=off -c autovacuum=on -c log_statement=none -c log_duration=off
+      'postgres -c max_connections=400 -c shared_buffers=512MB -c effective_cache_size=500MB -c log_min_messages=FATAL && sh -c psql -h pgbouncer -p 6432 -U postgres -d postgres -c "SELECT 1"'' '
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
@@ -82,16 +83,16 @@ services:
       interval: 3s
       timeout: 5s
       retries: 10
-    ports:
-      - '6553:5432'
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: '800M'
+          memory: '1200M'
     volumes:
       - ./rinha-backend/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
+    ports:
+      - '6553:5432'
     networks:
       - app-network
 
@@ -108,6 +109,9 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    command:
+      'redis-server --save "" --appendonly no'
+
     healthcheck:
       test: [ 'CMD', 'redis-cli', '--raw', 'incr', 'ping' ]
     networks:
