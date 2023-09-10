@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.judalabs.rinhabackend.exception.UnprocessableEntityException;
 import com.judalabs.rinhabackend.infra.Cacheable;
@@ -28,13 +27,12 @@ public class PessoaService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Transactional
     public PessoaDTO criar(PessoaDTO pessoa) {
         if(cacheService.existePorApelido(pessoa.apelido())) {
             throw new UnprocessableEntityException();
         }
-        final PessoaDTO dto = toDto(pessoaRepository.save(toEntity(pessoa)));
-        applicationEventPublisher.publishEvent(dto);
+        final PessoaDTO dto = toDto(pessoaRepository.saveAndFlush(toEntity(pessoa)));
+        cacheService.atualizacaoDeCacheListener(dto);
         return dto;
     }
 

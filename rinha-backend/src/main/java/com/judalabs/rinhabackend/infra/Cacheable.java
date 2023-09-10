@@ -9,4 +9,6 @@ public interface Cacheable {
 
     PessoaDTO existePorId(UUID id);
 
+    void atualizacaoDeCacheListener(PessoaDTO dto);
+
 }
