@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import com.judalabs.rinhabackend.validation.Pessoa;
+import com.judalabs.rinhabackend.validation.PessoaValida;
 
-@Pessoa
+@PessoaValida
 public class PessoaDTO implements Serializable {
 
     private UUID id;
@@ -68,8 +68,13 @@ public class PessoaDTO implements Serializable {
         this.stack = stack;
     }
 
-    public static PessoaDTO toDto(com.judalabs.rinhabackend.domain.Pessoa entity) {
+    public static PessoaDTO toDto(Pessoa entity) {
         List<String> stacks = entity.getStack() != null ? Arrays.stream(entity.getStack().split(",")).toList() : null;
-        return new PessoaDTO(entity.getId(), entity.getApelido(), entity.getNome(), entity.getNascimento(), stacks);
+        return new PessoaDTO(entity.getId(), entity.getNome(), entity.getApelido(), entity.getNascimento(), stacks);
+    }
+
+    public static Pessoa toEntity(PessoaDTO pessoa) {
+        var stack = pessoa.getStack() != null ? String.join(",", pessoa.getStack()) : null;
+        return new Pessoa(pessoa.getNome(), pessoa.getApelido(), pessoa.getNascimento(), stack);
     }
 }

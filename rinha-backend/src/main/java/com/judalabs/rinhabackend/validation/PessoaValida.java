@@ -11,7 +11,7 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = PessoaValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Pessoa {
+public @interface PessoaValida {
 
     String message() default "stack incorreta";
 

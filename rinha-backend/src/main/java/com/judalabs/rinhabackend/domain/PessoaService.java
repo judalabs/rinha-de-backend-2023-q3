@@ -36,7 +36,7 @@ public class PessoaService {
     }
 
     private Mono<PessoaDTO> buscarSalvandoNoBanco(PessoaDTO pessoa) {
-        final Pessoa entity = toEntity(pessoa);
+        final Pessoa entity = PessoaDTO.toEntity(pessoa);
         return pessoaRepository.save(entity).map(e -> {
             final PessoaDTO dto = PessoaDTO.toDto(e);
             applicationEventPublisher.publishEvent(new PessoaSalvaListener(dto));
@@ -59,11 +59,4 @@ public class PessoaService {
     public Mono<Long> contar() {
         return pessoaRepository.count();
     }
-
-    private Pessoa toEntity(PessoaDTO pessoa) {
-        var stack = pessoa.getStack() != null ? String.join(",", pessoa.getStack()) : null;
-        return new Pessoa(pessoa.getNome(), pessoa.getApelido(), pessoa.getNascimento(), stack);
-    }
-
-
 }

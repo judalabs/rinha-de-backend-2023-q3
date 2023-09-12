@@ -7,7 +7,7 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class PessoaValidator implements ConstraintValidator<Pessoa, PessoaDTO> {
+public class PessoaValidator implements ConstraintValidator<PessoaValida, PessoaDTO> {
 
     @Override
     public boolean isValid(PessoaDTO pessoaDTO, ConstraintValidatorContext context) {
