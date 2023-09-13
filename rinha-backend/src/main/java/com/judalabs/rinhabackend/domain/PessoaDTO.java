@@ -74,7 +74,11 @@ public class PessoaDTO implements Serializable {
     }
 
     public static Pessoa toEntity(PessoaDTO pessoa) {
-        var stack = pessoa.getStack() != null ? String.join(",", pessoa.getStack()) : null;
+        final var stack = getStackString(pessoa);
         return new Pessoa(pessoa.getNome(), pessoa.getApelido(), pessoa.getNascimento(), stack);
+    }
+
+    public static String getStackString(PessoaDTO pessoa) {
+        return pessoa.getStack() != null ? String.join(",", pessoa.getStack()) : null;
     }
 }
