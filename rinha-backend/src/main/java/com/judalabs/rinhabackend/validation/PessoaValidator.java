@@ -6,7 +6,7 @@ import com.judalabs.rinhabackend.exception.UnprocessableEntityException;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class PessoaValidator implements ConstraintValidator<Pessoa, PessoaDTO> {
+public class PessoaValidator implements ConstraintValidator<PessoaValida, PessoaDTO> {
 
     @Override
     public boolean isValid(PessoaDTO pessoaDTO, ConstraintValidatorContext context) {

@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.judalabs.rinhabackend.exception.UnprocessableEntityException;
+import com.judalabs.rinhabackend.infra.BatchInsertService;
 import com.judalabs.rinhabackend.infra.Cacheable;
 import com.judalabs.rinhabackend.infra.PessoaRepository;
 
@@ -18,22 +19,26 @@ public class PessoaService {
     private final PessoaRepository pessoaRepository;
     private final Cacheable cacheService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BatchInsertService batchInsertService;
 
     public PessoaService(PessoaRepository pessoaRepository,
                          Cacheable cacheService,
-                         ApplicationEventPublisher applicationEventPublisher) {
+                         ApplicationEventPublisher applicationEventPublisher,
+                         BatchInsertService batchInsertService) {
         this.pessoaRepository = pessoaRepository;
         this.cacheService = cacheService;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.batchInsertService = batchInsertService;
     }
 
-    public PessoaDTO criar(PessoaDTO pessoa) {
-        if(cacheService.existePorApelido(pessoa.apelido())) {
+    public PessoaDTO criar(PessoaDTO pessoaDTO) {
+        if(cacheService.existePorApelido(pessoaDTO.apelido())) {
             throw new UnprocessableEntityException();
         }
-        final PessoaDTO dto = toDto(pessoaRepository.saveAndFlush(toEntity(pessoa)));
-        cacheService.atualizacaoDeCacheListener(dto);
-        return dto;
+        final PessoaDTO pessoa = cacheService.lazySave(pessoaDTO);
+
+        batchInsertService.salvaSeEstaCheio(cacheService.getBatch());
+        return pessoa;
     }
 
     public Optional<PessoaDTO> buscarPorId(UUID id) {

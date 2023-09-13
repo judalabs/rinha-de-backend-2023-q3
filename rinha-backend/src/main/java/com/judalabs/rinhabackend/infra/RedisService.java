@@ -1,9 +1,12 @@
 package com.judalabs.rinhabackend.infra;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import com.judalabs.rinhabackend.domain.PessoaDTO;
@@ -11,12 +14,15 @@ import com.judalabs.rinhabackend.domain.PessoaDTO;
 @Service
 public class RedisService implements Cacheable {
 
+    private final RedisTemplate<Boolean, List<PessoaDTO>> redisBatchSave;
     private final RedisTemplate<UUID, PessoaDTO> redisFindOne;
     private final RedisTemplate<String, Boolean> redisExistsApelido;
 
     public RedisService(
+            @Qualifier("redisBatchSave") RedisTemplate<Boolean, List<PessoaDTO>> redisBatchSave,
             @Qualifier("redisFindOne") RedisTemplate<UUID, PessoaDTO> redisFindOne,
             @Qualifier("redisExistsApelido") RedisTemplate<String, Boolean> redisExistsApelido) {
+        this.redisBatchSave = redisBatchSave;
         this.redisFindOne = redisFindOne;
         this.redisExistsApelido = redisExistsApelido;
     }
@@ -32,7 +38,25 @@ public class RedisService implements Cacheable {
     }
 
     public void atualizacaoDeCacheListener(PessoaDTO pessoaDTO) {
+
         redisFindOne.opsForValue().set(pessoaDTO.id(), pessoaDTO);
         redisExistsApelido.opsForValue().set(pessoaDTO.apelido(), true);
+    }
+
+    public PessoaDTO lazySave(PessoaDTO pessoaDTO) {
+        final PessoaDTO pessoaComId = PessoaDTO.comRandomId(pessoaDTO);
+        List<PessoaDTO> listaBatch = redisBatchSave.opsForValue().get(true);
+        if(listaBatch == null) {
+            listaBatch = new ArrayList<>();
+        }
+        listaBatch.add(pessoaComId);
+        redisBatchSave.opsForValue().set(true, listaBatch);
+        atualizacaoDeCacheListener(pessoaComId);
+        return pessoaComId;
+    }
+
+    @Override
+    public ValueOperations<Boolean, List<PessoaDTO>> getBatch() {
+        return redisBatchSave.opsForValue();
     }
 }

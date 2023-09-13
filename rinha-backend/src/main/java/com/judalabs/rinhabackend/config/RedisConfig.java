@@ -1,5 +1,6 @@
 package com.judalabs.rinhabackend.config;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +26,14 @@ public class RedisConfig {
     @Qualifier("redisExistsApelido")
     public RedisTemplate<String, Boolean> redisExistsApelido(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Boolean> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        return template;
+    }
+
+    @Bean
+    @Qualifier("redisBatchSave")
+    public RedisTemplate<Boolean, List<PessoaDTO>> redisBatchSave(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<Boolean, List<PessoaDTO>> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         return template;
     }
