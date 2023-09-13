@@ -7,10 +7,10 @@ services:
     hostname: api-1
     environment:
       - SERVER_PORT=8080
-      - DATABASE_URL=r2dbc:postgresql://postgres-db:5432/postgres
+      - DATABASE_URL=r2dbc:postgresql://localhost:5432/postgres
       - DATABASE_USERNAME=postgres
       - DATABASE_PASSWORD=postgres
-      - REDIS_HOST=cache
+      - REDIS_HOST=localhost
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -21,12 +21,17 @@ services:
         limits:
           cpus: '0.45'
           memory: '650M'
-    networks:
-      app-network:
+    network_mode: 'host'
 
   api-2:
     <<: *api
     hostname: api-2
+    environment:
+      - SERVER_PORT=8081
+      - DATABASE_URL=r2dbc:postgresql://localhost:5432/postgres
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - REDIS_HOST=localhost
 
   nginx:
     image: nginx:latest
@@ -42,8 +47,8 @@ services:
         limits:
           cpus: '0.05'
           memory: '350M'
-    networks:
-      - app-network
+    network_mode: 'host'
+
   postgres-db:
     image: postgres:latest
     container_name: postgres-db
@@ -60,7 +65,7 @@ services:
       timeout: 5s
       retries: 10
     ports:
-      - '6553:5432'
+      - '5432:5432'
     deploy:
       resources:
         limits:
@@ -68,9 +73,7 @@ services:
           memory: '1100M'
     volumes:
       - ./rinha-backend/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
-    networks:
-      - app-network
+    network_mode: 'host'
 
   cache:
     hostname: cache
@@ -88,8 +91,4 @@ services:
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     healthcheck:
       test: [ 'CMD', 'redis-cli', '--raw', 'incr', 'ping' ]
-    networks:
-      - app-network
-
-networks:
-  app-network:
+    network_mode: 'host'
